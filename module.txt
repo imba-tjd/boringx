@@ -1,0 +1,42 @@
+其它参数：
+--with-libatomic
+--with-openssl-opt='enable-ec_nistp_64_gcc_128'
+--with-cc-opt='-fPIC -m64 -march=native --param=ssp-buffer-size=4 -gsplit-dwarf'
+--with-ld-opt='-fPIE -pie -flto -ljemalloc -Wl,-rpath,/usr/local/lib'
+cc-opt还有一个-DTCP_FASTOPEN=23，但在dockerfile里改会提示只读文件系统
+好像不需要加-I/usr/src/boringssl/.openssl/include和-L/usr/src/boringssl/.openssl/lib，只要有--with-openssl就好了
+-flto为链接期间的优化，且不能和-gsplit-dwarf一起使用；march=native在别的CPU上用可能出现BUG
+
+其它模块：
+ngx-fancyindex
+ngx_cache_purge
+echo-nginx-module
+set-misc-nginx-module
+redis2-nginx-module
+ngx_http_redis
+srcache-nginx-module
+http-auth-pam
+http-dav-ext
+http-echo
+http-upstream-fair
+http-subs-filter
+nginx_concat_module
+https://github.com/nbs-system/naxsi 一个WAF，可防止XSS和SQL注入
+https://github.com/yaoweibin/ngx_http_substitutions_filter_module
+
+
+APT装好后自带的：
+ngx_http_auth_pam_module.so
+ngx_http_dav_ext_module
+ngx_http_echo_module.so
+ngx_http_geoip_module.so
+ngx_http_image_filter_module.so
+ngx_http_subs_filter_module.so
+ngx_http_upstream_fair_module.so
+ngx_http_xslt_filter_module.so
+ngx_mail_module.so
+ngx_stream_module.so
+
+其它编译相关：
+如何使用--with-compat：https://github.com/jinhailang/blog/issues/24
+使用clang编译：https://community.centminmod.com/threads/guide-to-gcc-clang-compiler-selection-for-nginx-installs.13729/

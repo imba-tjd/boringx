@@ -1,0 +1,55 @@
+name: Build
+
+on: push
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - run: |
+        cd mainline/alpine;
+        docker build --rm -t imbatjd/boringx:slim -f Slim.Dockerfile .;
+      env:
+        DOCKER_BUILDKIT: 1
+
+    - uses: azure/docker-login@v1
+      with:
+        username: imbatjd
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+    - run: |
+        docker push imbatjd/boringx:slim;
+        curl -sSL -d "" https://hooks.microbadger.com/images/imbatjd/boringx/${{ secrets.MICROBADGER }}
+
+
+  debian:
+    runs-on: ubuntu-latest
+    container: golang # 用apt无需加sudo
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - run: |
+        # sed -i '2s/buster/testing/' /etc/apt/sources.list;
+        apt update;
+        apt install -y cmake libpcre3-dev zlib1g-dev libunwind-dev upx;
+
+        apt install -y lsb-release wget software-properties-common;
+        bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)";
+
+        # apt install -y libgcc-8-dev gcc-10 g++-10;
+        # cd /usr/bin && ln -sf gcc-10 gcc && ln -sf gcc-10 cc && ln -sf g++-10 g++ && ln -sf g++-10 c++;
+
+    - run: bash ./tiny.sh;
+      env:
+        CC:  clang-11
+        CXX: clang++-11
+      # 也可用export CC=gcc-10 CXX=g++-10;
+
+    - uses: actions/upload-artifact@v2
+      with:
+        name: nginx
+        path: ./nginx
